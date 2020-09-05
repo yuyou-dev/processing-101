@@ -1,140 +1,108 @@
 from math import *
 import random
+from Modules import *
 
-class Vec2d(object):
-    x = 0
-    y = 0
-    def __init__(self,x = 0,y = 0):
-        self.x = x
-        self.y = y
-    def copy(self):
-        return Vec2d(self.x,self.y)
-    def add(self,x,y):
-        self.x = self.x + x
-        self.y = self.y + y
-    def set(self,x,y):
-        self.x = x
-        self.y = y
-class ContinuousBezierLine(object):
-    first = None
-    selected = False
-    def __init__(self,first):
-        self.first = first
-        first.parent = self
-    def select(self):
-        self.selected = True
-class ControlPoint(Vec2d):
-    parent = None
-    another = None
-    def __init__(self,x,y,parent):
-        super(ControlPoint,self).__init__(x,y)
-        self.parent = parent
-    def peer(self,another):
-        self.another = another
-        another.another = self
-    def delete(self):
-        self.parent = None
-        self.another.parent = None
-        self.another.another = None
-        self.another = None
-    def getControlLength(self):
-        x1 = self.parent.x
-        y1 = self.parent.y
-        x2 = self.x
-        y2 = self.y
-        return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
-    def adjust(self,x,y,d2):
-        self.x = x
-        self.y = y
-        d1 = self.getControlLength()
-        px = d2 / d1 * (self.parent.x - x) + self.parent.x
-        py = d2 / d1 * (self.parent.y - y) + self.parent.y
-        self.another.set(px,py)
-class BezierPoint(Vec2d):
-    next = None
-    prev = None
-    cPrev = None
-    cNext = None
-    selected = False
-    isFirst = False
-    parent = None
-    def __init__(self,x,y,prev):
-        super(BezierPoint,self).__init__(x,y)
-        self.prev = prev
-        if(prev != None):prev.next = self
-        self.cPrev = ControlPoint(x,y,self)
-        self.cNext = ControlPoint(x,y,self)
-        self.peer()
-    def peer(self):
-        self.cPrev.peer(self.cNext)
-    def delete(self):
-        if self.prev != None:
-            self.prev.next = self.next
-            if self.isFirst:
-                self.prev.isFirst = True
-                self.parent.first = self.prev
-        if self.next != None:
-            self.next.prev = self.prev
-        self.cPrev.delete()
-    def adjust(self,x,y):
-        dx = x - self.x
-        dy = y - self.y
-        self.cPrev.add(dx,dy)
-        self.cNext.add(dx,dy)
-        self.x = x
-        self.y = y
-    def select(self):
-        self.selected = True
-        self.parent.select()
-    def release(self):
-        self.selected = False
-    def setNextControlPoint(self,x,y):
-        self.cNext.set(x,y)
-    def setPrevControlPoint(self,x,y):
-        self.cPrev.set(x,y)
-    def createAndMoveControlPoint(self,x,y):
-        self.setNextControlPoint(x,y)
-        px = 2 * self.x - self.cNext.x
-        py = 2 * self.y - self.cNext.y
-        self.setPrevControlPoint(px,py)
-    def getPoint(self):
-        return self.copy()
-    def displayPoint(self):
-        point(self.x,self.y)
-    def displayControlLine(self):
-        stroke(13,127,190)
-        strokeWeight(1)
-        fill(255)
-        line(self.cPrev.x,self.cPrev.y,self.x,self.y)
-        line(self.x,self.y,self.cNext.x,self.cNext.y)
-        circle(self.cPrev.x,self.cPrev.y,5)
-        circle(self.cNext.x,self.cNext.y,5)
-        if self.selected:
-            fill(0,132,244)
-        else:
-            fill(255,255,255)
-        rect(self.x,self.y,16,16)
-    def displayLine(self):
-        if self.prev != None:
-            line(self.prev.x,self.prev.y,self.x,self.y)
-        else:return
-    def displayBezierLine(self,isFirst = False):
-        if self.prev != None:
-            p1 = self.prev.getPoint()
-            p2 = self.getPoint()
-            c1 = self.prev.cNext.copy()
-            c2 = self.cPrev.copy()
-            noFill()
-            stroke(0,0,0)
-            strokeWeight(10)
-            bezier(p1.x,p1.y,c1.x,c1.y,c2.x,c2.y,p2.x,p2.y)
-            stroke(251,228,20)
-            strokeWeight(8)
-            bezier(p1.x,p1.y,c1.x,c1.y,c2.x,c2.y,p2.x,p2.y)
-        if self.next != None:
-            if isFirst == False:
-                if self.next.isFirst == True:
-                    self.next.displayBezierLine(True)
-                else:
-                    self.next.displayBezierLine()
-        self.displayControlLine()
+prev = None
+first = None
+status = 0
+controlPoints = []
+anotherControlLength = 0
+bezierPoints = []
+selectedItem = None
+selectedPoint = None
+continuousBezierLineGroup = []
+selectedBezier = None
+def mousePressed():
+    global prev,first,status,controlPoints,anotherControlLength,controller,bezierPoints
+    global selectedItem,selectedPoint
+    global continuousBezierLineGroup,selectedBezier
+    for b in bezierPoints:
+        if abs(b.x - mouseX) < 16 and abs(b.y - mouseY) < 16:
+            status = 3
+            selectedItem = b
+            if selectedItem == first:
+                status = 100
+    for c in controlPoints:
+        if abs(c.x - mouseX) < 3 and abs(c.y - mouseY) < 3:
+            status = 2
+            selectedItem = c
+            anotherControlLength = c.another.getControlLength()
+            
+    if selectedPoint != None:
+        selectedPoint.release()
+    selectedPoint = None
+    if selectedItem == None:
+        b = BezierPoint(mouseX,mouseY,prev)
+        controlPoints.append(b.cPrev)
+        controlPoints.append(b.cNext)
+        bezierPoints.append(b)
+        if first == None:
+            first = b
+            first.isFirst = True
+            newBezier = ContinuousBezierLine(first)
+            continuousBezierLineGroup.append(newBezier)
+            selectedBezier = newBezier
+        for continuousBezierLine in continuousBezierLineGroup:
+            continuousBezierLine.first.displayBezierLine()
+        prev = b
+        b.parent = first.parent
+        status = 4
+    if status == 3:
+        selectedPoint = selectedItem
+        selectedPoint.select()
+        background(255)
+        for continuousBezierLine in continuousBezierLineGroup:
+            continuousBezierLine.first.displayBezierLine()
+    if status == 100:
+        selectedPoint = selectedItem
+        selectedPoint.select()
+        first.prev = prev
+        prev.next = first
+        first.displayBezierLine()
+        first = None
+        prev = None
+def mouseDragged():
+    global prev,status,first,anotherControlLength
+    global selectedItem
+    global continuousBezierLineGroup,selectedBezier
+    if selectedItem != None:
+        if status == 2:
+            anotherControlLength = selectedItem.another.getControlLength()
+            selectedItem.adjust(mouseX,mouseY,anotherControlLength)
+        elif status == 3 or status == 100:
+            selectedItem.adjust(mouseX,mouseY)
+    else:
+        prev.createAndMoveControlPoint(mouseX,mouseY)
+    background(255)  
+    for continuousBezierLine in continuousBezierLineGroup:
+        continuousBezierLine.first.displayBezierLine()
+def mouseReleased():
+    global status,selectedItem
+    status = 0
+    selectedItem = None
+def setup():
+    rectMode(CENTER)
+    size(1000,1000)
+    background(255)
+    smooth(8)
+    noFill()
+def draw():
+    global status
+def keyPressed():
+    global status,selectedItem,controlPoints,bezierPoints,prev,first,selectedPoint
+    global continuousBezierLineGroup,selectedBezier
+    if key == BACKSPACE:
+        if selectedPoint != None:
+            if selectedPoint == first:
+                first = selectedPoint.next
+                first.isFirst = True
+            if selectedPoint == prev:
+                prev = selectedPoint.prev
+            selectedPoint.delete()
+            controlPoints.remove(selectedPoint.cPrev)
+            controlPoints.remove(selectedPoint.cNext)
+            bezierPoints.remove(selectedPoint)
+            selectedPoint = None
+            background(255)
+            for continuousBezierLine in continuousBezierLineGroup:
+                continuousBezierLine.first.displayBezierLine()
