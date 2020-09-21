@@ -76,7 +76,7 @@ class BezierPoint(Vec2d):
         if self.next != None:
             self.next.prev = self.prev
         self.cPrev.delete()
-    def adjust(self,x,y):
+    def adjust(self,x,y,d):
         dx = x - self.x
         dy = y - self.y
         self.cPrev.add(dx,dy)
@@ -92,7 +92,7 @@ class BezierPoint(Vec2d):
         self.cNext.set(x,y)
     def setPrevControlPoint(self,x,y):
         self.cPrev.set(x,y)
-    def createAndMoveControlPoint(self,x,y):
+    def setControlFirst(self,x,y):
         self.setNextControlPoint(x,y)
         px = 2 * self.x - self.cNext.x
         py = 2 * self.y - self.cNext.y
@@ -109,10 +109,8 @@ class BezierPoint(Vec2d):
         line(self.x,self.y,self.cNext.x,self.cNext.y)
         circle(self.cPrev.x,self.cPrev.y,5)
         circle(self.cNext.x,self.cNext.y,5)
-        if self.selected:
-            fill(0,132,244)
-        else:
-            fill(255,255,255)
+        if self.selected:fill(0,132,244)
+        else:fill(255,255,255)
         rect(self.x,self.y,16,16)
     def displayLine(self):
         if self.prev != None:
@@ -125,16 +123,26 @@ class BezierPoint(Vec2d):
             c1 = self.prev.cNext.copy()
             c2 = self.cPrev.copy()
             noFill()
+
+            stroke(0,0,0,100)
+            strokeWeight(12)
+            off = 5
+            bezier(p1.x,p1.y + off,c1.x,c1.y + off,c2.x,c2.y + off,p2.x,p2.y + off)
+
             stroke(0,0,0)
-            strokeWeight(10)
+            strokeWeight(12)
             bezier(p1.x,p1.y,c1.x,c1.y,c2.x,c2.y,p2.x,p2.y)
+
             stroke(251,228,20)
             strokeWeight(8)
             bezier(p1.x,p1.y,c1.x,c1.y,c2.x,c2.y,p2.x,p2.y)
+
         if self.next != None:
             if isFirst == False:
                 if self.next.isFirst == True:
-                    self.next.displayBezierLine(True)
+                    a = 5
+                    #self.next.displayBezierLine(True)
                 else:
+                    a = 5
                     self.next.displayBezierLine()
         self.displayControlLine()
