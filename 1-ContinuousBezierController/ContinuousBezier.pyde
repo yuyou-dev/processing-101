@@ -7,10 +7,8 @@ status = 0
 controlPoints = []
 anotherControlLength = 0
 bezierPoints = []
-selectedItem = None
-selectedPoint = None
+selectedItem, selectedPoint, selectedBezier = None, None, None
 continuousBezierLineGroup = []
-selectedBezier = None
 def drawBeziers():
     global continuousBezierLineGroup
     background(255)
