@@ -2,27 +2,27 @@ from math import *
 import random
 
 class Vec2d(object):
-    x = 0
-    y = 0
+    x, y = 0, 0
     def __init__(self,x = 0,y = 0):
-        self.x = x
-        self.y = y
+        self.x, self.y = x, y
     def copy(self):
         return Vec2d(self.x,self.y)
     def add(self,x,y):
         self.x = self.x + x
         self.y = self.y + y
     def set(self,x,y):
-        self.x = x
-        self.y = y
+        self.x, self.y = x, y
+
+
 class ContinuousBezierLine(object):
     first = None
     selected = False
     def __init__(self,first):
-        self.first = first
-        first.parent = self
+        self.first, first.parent = first, self
     def select(self):
         self.selected = True
+
+
 class ControlPoint(Vec2d):
     parent = None
     another = None
@@ -30,31 +30,27 @@ class ControlPoint(Vec2d):
         super(ControlPoint,self).__init__(x,y)
         self.parent = parent
     def peer(self,another):
-        self.another = another
-        another.another = self
+        self.another, another.another = another, self
     def delete(self):
         self.parent = None
         self.another.parent = None
         self.another.another = None
         self.another = None
     def getControlLength(self):
-        x1 = self.parent.x
-        y1 = self.parent.y
-        x2 = self.x
-        y2 = self.y
+        x1, y1 = self.parent.x, self.parent.y
+        x2, y2 = self.x, self.y
         return sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2))
     def adjust(self,x,y,d2):
-        self.x = x
-        self.y = y
+        self.x, self.y = x, y
         d1 = self.getControlLength()
         px = d2 / d1 * (self.parent.x - x) + self.parent.x
         py = d2 / d1 * (self.parent.y - y) + self.parent.y
         self.another.set(px,py)
+
+
 class BezierPoint(Vec2d):
-    next = None
-    prev = None
-    cPrev = None
-    cNext = None
+    next, prev = None, None
+    cPrev, cNext = None, None
     selected = False
     isFirst = False
     parent = None
@@ -81,8 +77,7 @@ class BezierPoint(Vec2d):
         dy = y - self.y
         self.cPrev.add(dx,dy)
         self.cNext.add(dx,dy)
-        self.x = x
-        self.y = y
+        self.x, self.y = x, y
     def select(self):
         self.selected = True
         self.parent.select()
@@ -109,13 +104,16 @@ class BezierPoint(Vec2d):
         line(self.x,self.y,self.cNext.x,self.cNext.y)
         circle(self.cPrev.x,self.cPrev.y,5)
         circle(self.cNext.x,self.cNext.y,5)
-        if self.selected:fill(0,132,244)
-        else:fill(255,255,255)
+        if self.selected:
+            fill(0,132,244)
+        else:
+            fill(255,255,255)
         rect(self.x,self.y,16,16)
     def displayLine(self):
         if self.prev != None:
             line(self.prev.x,self.prev.y,self.x,self.y)
-        else:return
+        else:
+            return
     def displayBezierLine(self,isFirst = False):
         if self.prev != None:
             p1 = self.prev.getPoint()
@@ -139,10 +137,6 @@ class BezierPoint(Vec2d):
 
         if self.next != None:
             if isFirst == False:
-                if self.next.isFirst == True:
-                    a = 5
-                    #self.next.displayBezierLine(True)
-                else:
-                    a = 5
+                if self.next.isFirst == False:
                     self.next.displayBezierLine()
         self.displayControlLine()

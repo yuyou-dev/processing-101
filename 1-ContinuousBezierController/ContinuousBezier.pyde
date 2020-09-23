@@ -2,8 +2,7 @@ from math import *
 import random
 from Modules import *
 
-prev = None
-first = None
+prev, first = None, None
 status = 0
 controlPoints = []
 anotherControlLength = 0
@@ -12,6 +11,11 @@ selectedItem = None
 selectedPoint = None
 continuousBezierLineGroup = []
 selectedBezier = None
+def drawBeziers():
+    global continuousBezierLineGroup
+    background(255)
+    for continuousBezierLine in continuousBezierLineGroup:
+        continuousBezierLine.first.displayBezierLine()
 def mouseMoved():
     global controlPoints,status,anotherControlLength
     global selectedItem
@@ -33,7 +37,6 @@ def mouseMoved():
             selectedItem = c
             anotherControlLength = c.another.getControlLength()
 def mousePressed():
-    print('press')
     global prev,first,status,controlPoints,anotherControlLength,controller,bezierPoints
     global selectedItem,selectedPoint
     global continuousBezierLineGroup,selectedBezier
@@ -42,8 +45,7 @@ def mousePressed():
     selectedPoint = None
     if selectedItem == None:
         b = BezierPoint(mouseX,mouseY,prev)
-        controlPoints.append(b.cPrev)
-        controlPoints.append(b.cNext)
+        controlPoints.extend([b.cPrev, b.cNext])
         bezierPoints.append(b)
         if first == None:
             first = b
@@ -51,53 +53,37 @@ def mousePressed():
             newBezier = ContinuousBezierLine(first)
             continuousBezierLineGroup.append(newBezier)
             selectedBezier = newBezier
-        background(255)
-        for continuousBezierLine in continuousBezierLineGroup:
-            continuousBezierLine.first.displayBezierLine()
+        drawBeziers()
         prev = b
         b.parent = first.parent
         status = 4
     if status == 3:
         selectedPoint = selectedItem
         selectedPoint.select()
-        background(255)
-        for continuousBezierLine in continuousBezierLineGroup:
-            continuousBezierLine.first.displayBezierLine()
+        drawBeziers()
     if status == 100:
         selectedPoint = selectedItem
         selectedPoint.select()
-        first.prev = prev
-        prev.next = first
-        background(255)
-        for continuousBezierLine in continuousBezierLineGroup:
-            continuousBezierLine.first.displayBezierLine()
+        first.prev, prev.next = prev, first
+        drawBeziers()
+        first, prev = None, None
 
-        first = None
-        prev = None
 def mouseDragged():
-    global prev,status,first,anotherControlLength
-    global selectedItem
-    global continuousBezierLineGroup,selectedBezier
+    global prev,anotherControlLength,selectedItem,continuousBezierLineGroup
     if selectedItem != None:
         selectedItem.adjust(mouseX,mouseY,anotherControlLength)
     else:
         prev.setControlFirst(mouseX,mouseY)
-    background(255)
-    for continuousBezierLine in continuousBezierLineGroup:
-        continuousBezierLine.first.displayBezierLine()
+    drawBeziers()
 def mouseReleased():
     global status,selectedItem
-    global continuousBezierLineGroup,selectedBezier
-    status = 0
-    selectedItem = None
+    status ,selectedItem = 0, None
 def setup():
     rectMode(CENTER)
     size(1000,1000)
     background(255)
     smooth(8)
     noFill()
-    strokeWeight(5)
-    stroke(0)
 def draw():
     global status
 def keyPressed():
@@ -116,6 +102,4 @@ def keyPressed():
             controlPoints.remove(selectedPoint.cNext)
             bezierPoints.remove(selectedPoint)
             selectedPoint = None
-            background(255)
-            for continuousBezierLine in continuousBezierLineGroup:
-                continuousBezierLine.first.displayBezierLine()
+            drawBeziers()
