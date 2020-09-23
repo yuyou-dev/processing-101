@@ -7,7 +7,7 @@ class Vec2d(object):
         self.x, self.y = x, y
     def copy(self):
         return Vec2d(self.x, self.y)
-    def add(self,x,y):
+    def add(self, x, y):
         self.x = self.x + x
         self.y = self.y + y
     def set(self, x, y):
@@ -27,7 +27,7 @@ class ControlPoint(Vec2d):
     parent = None
     another = None
     def __init__(self, x, y, parent):
-        super(ControlPoint,self).__init__(x, y)
+        super(ControlPoint, self).__init__(x, y)
         self.parent = parent
     def peer(self, another):
         self.another, another.another = another, self
@@ -54,7 +54,7 @@ class BezierPoint(Vec2d):
     selected = False
     isFirst = False
     def __init__(self, x, y, prev):
-        super(BezierPoint,self).__init__(x, y)
+        super(BezierPoint, self).__init__(x, y)
         self.prev = prev
         if prev != None:
             prev.next = self

@@ -28,11 +28,13 @@ def mouseMoved():
             selectedItem = b
             if selectedItem == first:
                 status = 100
+            break;
     for c in controlPoints:
         if abs(c.x - mouseX) < 3 and abs(c.y - mouseY) < 3:
             status = 2
             selectedItem = c
             anotherControlLength = c.another.getControlLength()
+            break;
 def mousePressed():
     global prev, first, status, controlPoints, bezierPoints
     global selectedItem, selectedPoint
@@ -58,7 +60,7 @@ def mousePressed():
         selectedPoint = selectedItem
         selectedPoint.select()
         drawBeziers()
-    if status == 100:
+    elif status == 100:
         selectedPoint = selectedItem
         selectedPoint.select()
         first.prev, prev.next = prev, first
@@ -74,18 +76,16 @@ def mouseDragged():
     drawBeziers()
 def mouseReleased():
     global status, selectedItem
-    status ,selectedItem = 0, None
+    status, selectedItem = 0, None
 def setup():
     rectMode(CENTER)
     size(1000, 1000)
     background(255)
     smooth(8)
-    noFill()
 def draw():
     global status
 def keyPressed():
     global first, controlPoints, bezierPoints, prev, first, selectedPoint, selectedBezier
-    print(key == BACKSPACE)
     if key == BACKSPACE:
         if selectedPoint != None:
             if selectedPoint == first:
