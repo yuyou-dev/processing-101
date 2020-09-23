@@ -15,10 +15,9 @@ def drawBeziers():
     for continuousBezierLine in continuousBezierLineGroup:
         continuousBezierLine.first.displayBezierLine()
 def mouseMoved():
-    global controlPoints,status,anotherControlLength
-    global selectedItem
+    global controlPoints, status, anotherControlLength
+    global selectedItem, selectedBezier
     global first
-    global continuousBezierLineGroup,selectedBezier
     if status == 4:
         return
     status = 1
@@ -35,14 +34,14 @@ def mouseMoved():
             selectedItem = c
             anotherControlLength = c.another.getControlLength()
 def mousePressed():
-    global prev,first,status,controlPoints,anotherControlLength,controller,bezierPoints
-    global selectedItem,selectedPoint
-    global continuousBezierLineGroup,selectedBezier
+    global prev, first, status, controlPoints, bezierPoints
+    global selectedItem, selectedPoint
+    global continuousBezierLineGroup, selectedBezier
     if selectedPoint != None:
         selectedPoint.release()
     selectedPoint = None
     if selectedItem == None:
-        b = BezierPoint(mouseX,mouseY,prev)
+        b = BezierPoint(mouseX, mouseY, prev)
         controlPoints.extend([b.cPrev, b.cNext])
         bezierPoints.append(b)
         if first == None:
@@ -67,26 +66,25 @@ def mousePressed():
         first, prev = None, None
 
 def mouseDragged():
-    global prev,anotherControlLength,selectedItem,continuousBezierLineGroup
+    global prev, anotherControlLength, selectedItem
     if selectedItem != None:
-        selectedItem.adjust(mouseX,mouseY,anotherControlLength)
+        selectedItem.adjust(mouseX, mouseY, anotherControlLength)
     else:
-        prev.setControlFirst(mouseX,mouseY)
+        prev.setControlFirst(mouseX, mouseY)
     drawBeziers()
 def mouseReleased():
-    global status,selectedItem
+    global status, selectedItem
     status ,selectedItem = 0, None
 def setup():
     rectMode(CENTER)
-    size(1000,1000)
+    size(1000, 1000)
     background(255)
     smooth(8)
     noFill()
 def draw():
     global status
 def keyPressed():
-    global status,selectedItem,first,controlPoints,bezierPoints,prev,first,selectedPoint
-    global continuousBezierLineGroup,selectedBezier
+    global first, controlPoints, bezierPoints, prev, first, selectedPoint, selectedBezier
     print(key == BACKSPACE)
     if key == BACKSPACE:
         if selectedPoint != None:
