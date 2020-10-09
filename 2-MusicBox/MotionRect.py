@@ -54,7 +54,7 @@ class MotionRect(Rect2d):
                 endValue = 0
                 self.targetDepth = 0
             else:
-                endValue = map(self.dir, -1 ,1 ,0 ,min(self.w, self.h) / 2.0)
+                endValue = map(self.dir, -1, 1 ,0 ,min(self.w, self.h) / 2.0)
             self.lastTime = millis()
             self.changeRadiusTo(endValue)
         dr = self.targetRadius - self.currentRadius
@@ -64,7 +64,7 @@ class MotionRect(Rect2d):
         if abs(dr) > 1:
             self.currentRadius = self.currentRadius + dr / 5.0
         else:self.currentRadius = self.targetRadius
-        
+
     def getColor(self):
         colors = [
               color(13,127,190),
@@ -80,17 +80,17 @@ class MotionRect(Rect2d):
         fill(self.c, map(self.currentRadius, 0, min(self.w,self.h) / 2.0, 255, 0))
         rect(self.v1.x, self.v1.y, self.v2.x, self.v2.y, self.currentRadius)
         pop()
-        
+
 class Divider(object):
     x, y = 0.5, 0.5
     type = 'none'
     level = 0
     children = []
-    def __init__(self,type = 'none',level = 0,x = 0.5,y = 0.5):
+    def __init__(self,type = 'none', level = 0, x = 0.5, y = 0.5):
         self.type = type
         self.x, self.y = x, y
         self.level = level
-        
+
 counter = 0
 deck = []
 for i in range(128):
@@ -120,15 +120,15 @@ class RectManager(object):
                 grid.append(Divider('none', level - 1))
         divider.children = grid
         return
-    
+
     def addRect(self,subRect):
         self.rectGroup.append(subRect.copy())
-        
+
     def display(self,current):
         for r in self.rectGroup:
             r.display(current)
-            
-    def getSubRectGroup(self,bRect,dv):
+
+    def getSubRectGroup(self, bRect, dv):
         v1 = bRect.v1.copy()
         v2 = bRect.v2.copy()
         xRange = [v1.x, map(dv.x, 0,1, v1.x, v2.x), v2.x]
@@ -139,13 +139,13 @@ class RectManager(object):
                 if i < 2 and j < 2:
                     sv1 = Vec2d(xRange[i], yRange[j])
                     sv2 = Vec2d(xRange[i + 1], yRange[j + 1])
-                    
+
                     global counter, deck
                     subRect = MotionRect(sv1, sv2, deck[counter])
                     counter = counter + 1
                     data.append(subRect)
         return data
-    
+
     def createDivider(self, dRect, dv = None):
         if dv == None:
             dv = self.root
@@ -153,18 +153,18 @@ class RectManager(object):
             self.addRect(dRect.copy())
             return
         elif dv.type == 'full':
-            subRectGroup = self.getSubRectGroup(dRect.copy(),dv)
+            subRectGroup = self.getSubRectGroup(dRect.copy(), dv)
             for i in range(len(subRectGroup)):
                 subRect = subRectGroup[i]
                 subDivider = dv.children[i]
                 self.createDivider(subRect, subDivider)
-                
-                
+
+
 class FancyBox(object):
     faces = []
     def __init__(self):
         self.faces = []
-        
+
     def create(self):
         minX, minY = 400, 400
         maxX, maxY = 600, 600
@@ -172,7 +172,7 @@ class FancyBox(object):
             m = RectManager(Divider('full', 2, 0.5, 0.5))
             m.createDivider(MotionRect(Vec2d(minX, minY), Vec2d(maxX, maxY), 201 + i))
             self.faces.append(m)
-            
+
     def display(self,current):
         [m1, m2, m3, m4, m5, m6] = self.faces
         angle = millis() % 24000 / 24000.0 * TAU
@@ -183,23 +183,23 @@ class FancyBox(object):
         translate(500,500,-1000)
         rotateX(angle)
         rotateY(angle)
-        
+
         push()
         rotateX(angle * 10)
         rotateY(angle * 5)
         fill(map(sin(millis() / 12000.0 * TAU),-1,1,0,255),map(cos(millis()  / 12000.0 * TAU),-1,1,0,255),map(sin(millis()  / 12000.0 * TAU),-1,1,255,0))
         box(map(sin(millis()  / 10000.0 * TAU),-1,1,50,100))
-        
+
         pop()
         push()
         translate(-width / 2,-width / 2,r)
         m1.display(current)
         pop()
-        
+
         push()
         rotateX(TAU / 2)
         translate(-width / 2,-width / 2,r)
-        
+
         m2.display(current)
         pop()
         push()
@@ -208,24 +208,24 @@ class FancyBox(object):
         translate(-width / 2,-width / 2,r)
         m3.display(current)
         pop()
-        
+
         push()
         rotateX(TAU / 2)
         rotateY(TAU / 4 + TAU / 2)
         translate(-width / 2,-width / 2,r)
         m4.display(current)
         pop()
-        
+
         push()
         rotateX(TAU / 4)
         translate(-width / 2,-width / 2,r)
         m5.display(current)
         pop()
-        
+
         push()
         rotateX(TAU / 4 + TAU / 2)
         translate(-width / 2,-width / 2,r)
         m6.display(current)
         pop()
-        
+
         pop()

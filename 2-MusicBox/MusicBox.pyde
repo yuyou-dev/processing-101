@@ -24,12 +24,8 @@ def setup():
     r2 = 400
     x = width / 2
     y = height / 2
-    aStart = 0
-    aEnd = TAU / 4
-    bStart = 0
-    bEnd = TAU / 16
 
-    file = SoundFile(this,'audio1.mp3')
+    file = SoundFile(this,'audio.mp3')
     file.play()
     bands = 512
     fft = FFT(this, bands)
@@ -47,17 +43,16 @@ def getColor():
 def draw():
     print(millis())
     background(255)
-    global amp,audio,waveform,samples,fft,sum,barWidth,colors,fBox
-    
+    global amp, audio, waveform, samples, fft, sum, barWidth, colors, fBox
+
     fft.analyze()
     fill(color(13,127,190))
     push()
-    
+
     strokeWeight(3)
     for i in range(128):
         sum[i] = 0.0
         sum[i] = sum[i] + (fft.spectrum[i] - sum[i]) * 0.2
-        
         if current[i] > sum[i]:
             c = (current[i] - sum[i]) * 0.05
             current[i] = current[i] - c
