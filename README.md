@@ -5,7 +5,7 @@ This is a repo of Processing-python course program. Project code will continuall
 
 ## Usage
 
-## Demo list
+## Case list
 
 - 1.ContinuousBezierController(https://github.com/yuyou-dev/processing-101/tree/master/1-ContinuousBezierController)
 - 2.MusicBox(https://github.com/yuyou-dev/processing-101/tree/master/2-MusicBox)
